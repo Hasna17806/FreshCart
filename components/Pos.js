@@ -9,7 +9,7 @@ const inr = (paise) => '₹' + (paise / 100).toFixed(2);
 export default function Pos({ products }) {
   const router = useRouter();
   const [q, setQ] = useState('');
-  const [cart, setCart] = useState({}); // { productId: qty }
+  const [cart, setCart] = useState({}); 
   const [cust, setCust] = useState({ name: '', phone: '' });
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
