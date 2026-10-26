@@ -57,16 +57,19 @@ export async function signup(_prev, fd) {
   redirect('/login?registered=1');
 }
 
+
 export async function login(_prev, fd) {
   const email = String(fd.get('email') || '').trim().toLowerCase();
   const password = String(fd.get('password') || '');
+  const loginType = String(fd.get('loginType') || 'staff');
 
   const r = await pool.query(
-    'SELECT id, password_hash FROM users WHERE email = $1',
+    'SELECT id, password_hash, role FROM users WHERE email = $1',
     [email]
   );
 
   const user = r.rows[0];
+
   const ok =
     user &&
     user.password_hash &&
@@ -76,9 +79,23 @@ export async function login(_prev, fd) {
     return { error: 'Invalid email or password' };
   }
 
+  if (loginType === 'admin' && user.role !== 'admin') {
+    return { error: 'Access denied. Admin account required.' };
+  }
+
+  if (loginType === 'staff' && user.role === 'admin') {
+    return { error: 'Please use the admin login page.' };
+  }
+
   await createSession(user.id);
+
+  if (user.role === 'admin') {
+    redirect('/admin');
+  }
+
   redirect('/dashboard');
 }
+
 
 export async function logout() {
   await destroySession();
